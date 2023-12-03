@@ -16,6 +16,9 @@ pipeline {
         stage('build') {
             steps {
                 sh 'mvn clean package'
+                withSonarQubeEnv(installationName: 'SONAR_CLOUD', credentialsId: 'SONAR_CLOUD') {
+                   sh  'mvn clean verify sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=jenkinsdec23 -Dsonar.projectKey=jenkinsdec23_test'
+                }
                 
             }
             post {
@@ -31,6 +34,13 @@ pipeline {
                 }
             }
         }
+        stage("Quality Gate") {
+            steps {
+              timeout(time: 1, unit: 'HOURS') {
+                waitForQualityGate abortPipeline: true
+              }
+            }
+          }
     }
     
 }
