@@ -40,7 +40,13 @@ pipeline {
                 waitForQualityGate abortPipeline: true
               }
             }
-          }
+        }
+        stage("docker image") {
+            agent { label: 'DOCKER' }
+            steps {
+                sh 'docker image build -t shaikkhajaibrahim/spc:dev-$BUILD_ID .'
+            }
+        }
     }
     
 }
