@@ -16,6 +16,7 @@ pipeline {
         stage('build') {
             steps {
                 sh 'mvn clean package'
+                stash name: 'spc', includes: '**/target/spring-petclinic-3.2.0-SNAPSHOT.jar'
                 withSonarQubeEnv(installationName: 'SONAR_CLOUD', credentialsId: 'SONAR_CLOUD') {
                    sh  'mvn clean verify sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=jenkinsdec23 -Dsonar.projectKey=jenkinsdec23_test'
                 }
@@ -42,8 +43,9 @@ pipeline {
             }
         }
         stage("docker image") {
-            agent { label: 'DOCKER' }
+            agent { label 'DOCKER' }
             steps {
+                unstash name: 'spc'
                 sh 'docker image build -t shaikkhajaibrahim/spc:dev-$BUILD_ID .'
             }
         }
